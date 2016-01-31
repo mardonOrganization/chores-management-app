@@ -1,0 +1,53 @@
+{
+  "project_info": {
+    "project_id": "choresmanagement-b3ef",
+    "project_number": "135025403143",
+    "name": "ChoresManagement"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135025403143:android:c094cd1b32cd64f4",
+        "client_id": "android:com.application.choresmanagement",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.application.choresmanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135025403143-gusqmmalvnthbu0c103i2otmghr2mtle.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.application.choresmanagement",
+            "certificate_hash": "964F1B203E3EBEA1F867F7EA3B113AFDA11DEAF1"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 2,
+          "test_banner_ad_unit_id": "ca-app-pub-3940256099942544/6300978111",
+          "test_interstitial_ad_unit_id": "ca-app-pub-3940256099942544/1033173712"
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

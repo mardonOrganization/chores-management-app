@@ -1,0 +1,50 @@
+package com.application.choresmanagement.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import com.google.gson.annotations.SerializedName;
+
+public class ChoreLog implements EntityBuilder, Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@SerializedName("user")
+	private User user; // utente che ha registrato il check-in della faccenda
+	
+	@SerializedName("date")
+	private Date date; // data in cui � stato registrato il check-in della faccenda
+	
+	public Date getDate() {
+		return date;
+	}
+
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+
+	public User getUser() {
+		return user;
+	}
+
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	@Override
+	public void buildEntity() {
+		// TODO Auto-generated method stub
+	}
+	@Override
+	public String toString() {
+		// TODO completare
+		return "ChoreLog {"
+		+ " date=" + date.toString()
+		+ ", user=" + user.toString()
+		+ "}";
+	}
+
+}
