@@ -1,6 +1,7 @@
 package com.application.choresmanagement.activity;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +41,7 @@ import android.widget.TextView;
 
 import com.application.choresmanagement.R;
 import com.application.choresmanagement.entity.User;
+import com.application.choresmanagement.utils.Authentication;
 import com.application.restfulclient.MongoLabImpl;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -83,27 +85,25 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-
-    // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mEmailLoginFormView;
     private View mSignOutButtons;
     private View mLoginFormView;
-
     private SignInButton mPlusLoginButton;
     private LoginButton mFacebookLoginButton;
-
     private TextView username, emailLabel;
     private ImageView image;
     private View profileFrame;
-
     private Gson gson;
-
     private MongoLabImpl myMongoLab;
-
     private CallbackManager callbackManager;
+    private User user;
+
+
+
+    private Authentication authentication;
 
     @Override
     protected void onResume() {
@@ -137,6 +137,8 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
 
 
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+
+        authentication = new Authentication(myMongoLab, gson);
 
 /*		// Find the Google+ sign in button.
         mPlusLoginButton = (GooglePlusButton) findViewById(R.id.plus_login_button);
@@ -228,20 +230,9 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                                         String email = (String) object.get("email");
                                         String name = (String) object.get("name");
 
-                                        User user = checkIfUserExists(email, id);
+                                        user = authentication.checkIfUserExists(email);
                                         if (user == null) {
-                                            user = new User();
-                                            user.setName(name);
-                                            user.setLastname(name);
-                                            user.setEmail(email);
-                                            user.setPassword(id);
-                                            user.setUsername(email);
-                                            JsonObject jsonObjectResult =
-                                                    myMongoLab.insertDocument("choresmanagement", "user", user);
-                                            JsonObject documentObjectJson = jsonObjectResult;
-                                            Log.d(TAG, "Document inserted");
-                                            User documentObjectModel = gson.fromJson(documentObjectJson, User.class);
-                                            Log.d(TAG, documentObjectModel.toString());
+                                            user = authentication.saveUser(name,name, email, id, email);
                                         }
 
 
@@ -254,7 +245,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                             }
                         });
                 Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender, birthday");
+                parameters.putString("fields", "email, user_about_me, public_profile");
                 request.setParameters(parameters);
                 request.executeAsync();
             }
@@ -291,35 +282,28 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
 
-//            Person currentPerson;
-//            currentPerson = PeopleApi.getCurrentPerson(getGoogleApiClient());
-//            String personName = currentPerson.getDisplayName();
-//            String personPhotoUrl = currentPerson.getImage().getUrl();
-//            String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
-//            String id = currentPerson.getId();
+            if (PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
+                Person currentPerson = PeopleApi.getCurrentPerson(getGoogleApiClient());
+                String personName = currentPerson.getDisplayName();
+                String personPhotoUrl = currentPerson.getImage().getUrl();
+                String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+                String id = currentPerson.getId();
+                user = authentication.checkIfUserExists(acct.getEmail());
+                if (user == null) {
+                    user = authentication.saveUser(currentPerson.getName().getGivenName(),
+                            currentPerson.getName().getFamilyName(),
+                            email,
+                            id,
+                            currentPerson.getNickname());
+                }
 
-            User user = checkIfUserExists(acct.getEmail(), acct.getId());
-            if (user == null) {
-                user = new User();
-                user.setName(acct.getDisplayName());
-                user.setLastname(acct.getDisplayName());
-                user.setEmail(acct.getEmail());
-                user.setPassword(acct.getId());
-                user.setUsername(acct.getDisplayName());
-                JsonObject jsonObjectResult =
-                        myMongoLab.insertDocument("choresmanagement", "user", user);
-                JsonObject documentObjectJson = jsonObjectResult;
-                Log.d(TAG, "Document inserted");
-                User documentObjectModel = gson.fromJson(documentObjectJson, User.class);
-                Log.d(TAG, documentObjectModel.toString());
+                username.setText(acct.getDisplayName());
+                emailLabel.setText(acct.getEmail());
+                new LoadProfileImage(image).execute(acct.getPhotoUrl());
+    //            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+                updateConnectButtonState();
             }
 
-
-            username.setText(acct.getDisplayName());
-            emailLabel.setText(acct.getEmail());
-            new LoadProfileImage(image).execute(acct.getPhotoUrl());
-//            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-            updateConnectButtonState();
         } else {
             // Signed out, show unauthenticated UI.
             updateConnectButtonState();
@@ -562,10 +546,10 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
 
         @Override
         protected Object doInBackground(Object... params) {
-            Uri uri = (Uri) params[0];
+            URL url = (URL) params[0];
             Bitmap icon = null;
             try {
-                InputStream in = new java.net.URL(uri.getPath()).openStream();
+                InputStream in = url.openStream();
                 icon = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
@@ -691,27 +675,5 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
         startActivity(intent);
     }
 
-    /**
-     * @param email
-     * @param password
-     * @return an instance of User if it exists on DB, otherwise null
-     */
-    public User checkIfUserExists(String email, String password) {
-        // Fetching user object
-        JsonObject query = new JsonObject();
-        query.addProperty("email", email);
-        query.addProperty("password", password);
-        //		String result = gson.toJson(query);
-        JsonArray usersJson = myMongoLab.queryDocuments("choresmanagement",
-                "user", query, User.class);
-        User userModel = new User();
-        if (usersJson.size() == 1) {
-            JsonObject userJson = usersJson.get(0).getAsJsonObject();
-            userModel = gson.fromJson(userJson, User.class);
-            //Log.d(TAG, userModel.toString());
-            return userModel;
-        }
-        return null;
-    }
 
 }

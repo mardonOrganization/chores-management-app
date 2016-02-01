@@ -9,9 +9,12 @@ import android.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.plus.Plus;
 
 /**
  * A base class to wrap communication with the Google Play Services PlusClient.
@@ -74,6 +77,8 @@ public abstract class PlusBaseActivity extends ActionBarActivity implements Conn
 		// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
 		gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 				.requestEmail()
+				.requestProfile()
+				.requestScopes(new Scope(Scopes.PLUS_ME), new Scope(Scopes.PLUS_LOGIN))
 				.build();
 
 		// Build a GoogleApiClient with access to the Google Sign-In API and the
@@ -81,7 +86,8 @@ public abstract class PlusBaseActivity extends ActionBarActivity implements Conn
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
 				.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-				.build();
+                .addApi(Plus.API)
+                .build();
 
 
 	}
