@@ -39,6 +39,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.application.choresmanagement.CustomListViewAndroidExample;
 import com.application.choresmanagement.R;
 import com.application.choresmanagement.entity.User;
 import com.application.choresmanagement.utils.Authentication;
@@ -73,12 +74,13 @@ import static com.google.android.gms.plus.Plus.PeopleApi;
  * ************ IMPORTANT SETUP NOTES: ************ In order for Google+ sign in to work with your app, you must first go to: https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api and follow the steps in "Step 1"
  * to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<Cursor>, View.OnClickListener {
+public class LoginActivity extends PlusBaseActivity implements View.OnClickListener {
 
     /**
      * A dummy authentication store containing known user names and passwords. TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{"foo@example.com:hello", "bar@example.com:world"};
+    public static final String USER = "user";
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     /**
@@ -172,7 +174,6 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -235,6 +236,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                                             user = authentication.saveUser(name,name, email, id, email);
                                         }
 
+                                        startMainActivity();
 
                                     } catch (JSONException e) {
                                         // TODO Auto-generated catch block
@@ -297,11 +299,12 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                             currentPerson.getNickname());
                 }
 
-                username.setText(acct.getDisplayName());
-                emailLabel.setText(acct.getEmail());
-                new LoadProfileImage(image).execute(acct.getPhotoUrl());
+//                username.setText(acct.getDisplayName());
+//                emailLabel.setText(acct.getEmail());
+//                new LoadProfileImage(image).execute(acct.getPhotoUrl());
     //            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-                updateConnectButtonState();
+//                updateConnectButtonState();
+                startMainActivity();
             }
 
         } else {
@@ -310,16 +313,6 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
         }
     }
 
-
-    private void populateAutoComplete() {
-        if (VERSION.SDK_INT >= 14) {
-            // Use ContactsContract.Profile (API 14+)
-            getLoaderManager().initLoader(0, null, this);
-        } else if (VERSION.SDK_INT >= 8) {
-            // Use AccountManager (API 8+)
-            new SetupEmailAutoCompleteTask().execute(null, null);
-        }
-    }
 
     /**
      * Attempts to sign in or register the account specified by the login form. If there are form errors (invalid email, missing fields, etc.), the errors are presented and no actual login attempt is made.
@@ -418,37 +411,37 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     @SuppressWarnings("unchecked")
     @Override
     protected void onPlusClientSignIn() {
-        // Set up sign out and disconnect buttons.
-        Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
-        signOutButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signOut();
-            }
-        });
-        Button disconnectButton = (Button) findViewById(R.id.plus_disconnect_button);
-        disconnectButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                revokeAccess();
-            }
-        });
-
-        try {
-            if (PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
-                Person currentPerson = PeopleApi.getCurrentPerson(getGoogleApiClient());
-                String personName = currentPerson.getDisplayName();
-                String personPhotoUrl = currentPerson.getImage().getUrl();
-                String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
-                String id = currentPerson.getId();
-
-                username.setText(personName);
-                emailLabel.setText(email);
-                new LoadProfileImage(image).execute(personPhotoUrl);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        // Set up sign out and disconnect buttons.
+//        Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
+//        signOutButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                signOut();
+//            }
+//        });
+//        Button disconnectButton = (Button) findViewById(R.id.plus_disconnect_button);
+//        disconnectButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                revokeAccess();
+//            }
+//        });
+//
+//        try {
+//            if (PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
+//                Person currentPerson = PeopleApi.getCurrentPerson(getGoogleApiClient());
+//                String personName = currentPerson.getDisplayName();
+//                String personPhotoUrl = currentPerson.getImage().getUrl();
+//                String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+//                String id = currentPerson.getId();
+//
+////                username.setText(personName);
+////                emailLabel.setText(email);
+////                new LoadProfileImage(image).execute(personPhotoUrl);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -479,46 +472,6 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
 
     }
 
-    /**
-     * Check if the device supports Google Play Services. It's best practice to check first rather than handling this as an error case.
-     *
-     * @return whether the device supports Google Play Services
-     */
-    private boolean supportsGooglePlayServices() {
-        return GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE + " = ?", new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<String>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -527,12 +480,6 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                 break;
             // ...
         }
-    }
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {ContactsContract.CommonDataKinds.Email.ADDRESS, ContactsContract.CommonDataKinds.Email.IS_PRIMARY,};
-
-        int ADDRESS = 0;
     }
 
     // download Google Account profile image, to complete profile
@@ -673,6 +620,15 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
         Intent intent = new Intent(this, RegisterActivity.class);
 
         startActivity(intent);
+    }
+
+    private Boolean startMainActivity() {
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(USER, user);
+
+        startActivity(intent);
+        return true;
     }
 
 
