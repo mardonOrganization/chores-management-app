@@ -32,7 +32,7 @@ public class User implements EntityBuilder, Serializable, Comparable<User> {
 //	private List<Group> myGroups;
 	
 	@SerializedName("groupid")
-	private ArrayList<Integer> myGroups;
+	private ArrayList<Group> myGroups;
 	
 	// TODO manca qualcos'altro
 
@@ -84,24 +84,13 @@ public class User implements EntityBuilder, Serializable, Comparable<User> {
 		this.email = email;
 	}
 	
-	public ArrayList<Integer> getMyGroups() {
+	public ArrayList<Group> getMyGroups() {
 		return myGroups;
 	}
 
-	public void setMyGroups(ArrayList<Integer> myGroups) {
+	public void setMyGroups(ArrayList<Group> myGroups) {
 		this.myGroups = myGroups;
 	}
-	
-	public void addGroupId(int groupId){
-		this.myGroups.add(groupId);
-	}
-//	public List<Group> getMyGroups() {
-//		return myGroups;
-//	}
-//	
-//	public void setMyGroups(List<Group> myGroups) {
-//		this.myGroups = myGroups;
-//	}
 
 	@Override
 	public int compareTo(User another) {
