@@ -21,7 +21,7 @@ android {
     productFlavors {
     }
     sourceSets {
-        main { java.srcDirs = ['src/main/java', 'src/test/java', 'src/androidTest/java'] }
+        main { java.srcDirs = ['src/main/java', 'src/androidTest/java'] }
     }
 }
 
@@ -43,4 +43,3 @@ dependencies {
     compile 'com.google.android.gms:play-services-identity:8.3.0'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
 }
-3

@@ -3,6 +3,7 @@ package com.application.choresmanagement.activity;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,12 +54,15 @@ import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.gson.Gson;
@@ -74,7 +78,7 @@ import static com.google.android.gms.plus.Plus.PeopleApi;
  * ************ IMPORTANT SETUP NOTES: ************ In order for Google+ sign in to work with your app, you must first go to: https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api and follow the steps in "Step 1"
  * to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends PlusBaseActivity implements View.OnClickListener {
+public class LoginActivity extends PlusBaseActivity implements OnClickListener {
 
     /**
      * A dummy authentication store containing known user names and passwords. TODO: remove after connecting to a real authentication system.
@@ -104,8 +108,12 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
     private User user;
 
 
-
     private Authentication authentication;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onResume() {
@@ -207,7 +215,8 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
         profileFrame = findViewById(R.id.profileFrame);
 
         mFacebookLoginButton = (LoginButton) findViewById(R.id.facebook_login_button);
-        mFacebookLoginButton.setReadPermissions("email", "user_friends", "public_profile");
+        mFacebookLoginButton.setReadPermissions(Arrays.asList(
+                "public_profile", "email", "user_birthday", "user_friends"));
 
         // Callback registration
         mFacebookLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -233,7 +242,7 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
 
                                         user = authentication.checkIfUserExists(email);
                                         if (user == null) {
-                                            user = authentication.saveUser(name,name, email, id, email);
+                                            user = authentication.saveUser(name, name, email, id, email);
                                         }
 
                                         startMainActivity();
@@ -247,7 +256,7 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
                             }
                         });
                 Bundle parameters = new Bundle();
-                parameters.putString("fields", "email, user_about_me, public_profile");
+                parameters.putString("fields", "id,name,email,gender,birthday");
                 request.setParameters(parameters);
                 request.executeAsync();
             }
@@ -263,14 +272,16 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
             }
         });
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int responseCode, Intent data) {
-        super.onActivityResult(requestCode, responseCode, data);
-
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
+            super.onActivityResult(requestCode, responseCode, data);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
         } else {
@@ -302,14 +313,11 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
 //                username.setText(acct.getDisplayName());
 //                emailLabel.setText(acct.getEmail());
 //                new LoadProfileImage(image).execute(acct.getPhotoUrl());
-    //            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+                //            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
 //                updateConnectButtonState();
                 startMainActivity();
             }
 
-        } else {
-            // Signed out, show unauthenticated UI.
-            updateConnectButtonState();
         }
     }
 
@@ -382,7 +390,7 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
@@ -480,6 +488,46 @@ public class LoginActivity extends PlusBaseActivity implements View.OnClickListe
                 break;
             // ...
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.application.choresmanagement.activity/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.application.choresmanagement.activity/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     // download Google Account profile image, to complete profile

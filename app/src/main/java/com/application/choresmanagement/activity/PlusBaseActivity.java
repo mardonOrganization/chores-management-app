@@ -230,7 +230,6 @@ public abstract class PlusBaseActivity extends ActionBarActivity implements Conn
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
-		updateConnectButtonState();
 		if (requestCode == OUR_REQUEST_CODE && responseCode == RESULT_OK) {
 			// If we have a successful result, we will want to be able to resolve any further
 			// errors, so turn on resolution with our flag.
