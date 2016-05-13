@@ -42,10 +42,10 @@ public class Authentication {
             query.addProperty("password", password);
         }
         //		String result = gson.toJson(query);
-        JsonArray usersJson = myMongoLab.queryDocuments("choresmanagement",
+        JsonArray usersJson = myMongoLab.queryDocuments("chores-management",
                 "user", query, User.class);
         User userModel = new User();
-        if (usersJson.size() == 1) {
+        if (usersJson != null && usersJson.size() == 1) {
             JsonObject userJson = usersJson.get(0).getAsJsonObject();
             userModel = gson.fromJson(userJson, User.class);
             //Log.d(TAG, userModel.toString());
@@ -62,7 +62,7 @@ public class Authentication {
         user.setPassword(password);
         user.setUsername(username);
         JsonObject jsonObjectResult =
-                myMongoLab.insertDocument("choresmanagement", "user", user);
+                myMongoLab.insertDocument("chores-management", "user", user);
         JsonObject documentObjectJson = jsonObjectResult;
         User documentObjectModel = gson.fromJson(documentObjectJson, User.class);
         return documentObjectModel;

@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        myMongoLab = MongoLabImpl.createInstance();
+        myMongoLab = MongoLabImpl.createInstance("1Eo97cO72-yUhHla_qn_eMRzFV1CdCr_");
         gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 
         Bundle extras = getIntent() != null ? getIntent().getExtras() : null;

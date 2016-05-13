@@ -120,6 +120,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/action_sign_in"
                         android:textStyle="bold"
+                        android:onClick="onButtonSignInClick"
                         android:layout_weight="1" />
 
                     <Button

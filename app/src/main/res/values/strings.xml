@@ -40,8 +40,13 @@
 
     <string name="name">Nome: </string>
     <string name="surname">Cognome:</string>
-    <string name="email">e-mail:</string>
+    <string name="email">E-mail:</string>
     <string name="title_activity_register">RegisterActivity</string>
+    <string name="password">Password:</string>
+    <string name="repeatPassword">Repeat password:</string>
+    <string name="birthDate">Date of Birth:</string>
+    <string name="confirmRegistration">confirm</string>
+    <string name="username">Username:</string>
 
 
 </resources>
